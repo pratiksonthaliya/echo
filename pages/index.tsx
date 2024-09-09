@@ -1,8 +1,14 @@
+import { SlOptions } from "react-icons/sl";
 import { LiaTeamspeak } from "react-icons/lia";
 import { BiBell, BiBookmark, BiEnvelope, BiHash, BiSolidHome, BiUser } from "react-icons/bi";
-import FeedCard from "@/components/FeedCard";
-import { SlOptions } from "react-icons/sl";
 
+import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
+import FeedCard from "@/components/FeedCard";
+import { useCallback } from "react";
+import toast from "react-hot-toast";
+import { graphqlClient } from "@/clients/api";
+import { verifyUserGoogleTokenQuery } from "@/graphql/query/user";
+ 
 interface EchoSideButton {
   title: string,
   icon: React.ReactNode
@@ -40,6 +46,20 @@ const sideBarMenuItems: EchoSideButton[]= [
 ]
 
 export default function Home() {
+  const handleLoginWithGoogle = useCallback( async (credentialResponse: CredentialResponse) => {
+    const googleToken = credentialResponse.credential;
+
+    if(!googleToken) return toast.error(`Google Token Not Found`);
+
+    const { verifyGoogleToken }  = await graphqlClient.request(verifyUserGoogleTokenQuery, {token: googleToken});
+
+    toast.success(`Verified Successful`) 
+    console.log(verifyGoogleToken);
+    
+    if(verifyGoogleToken) window.localStorage.setItem('__echo_token', verifyGoogleToken);
+
+  }, [])
+
   return (
     <div>
       <div className="grid grid-cols-12 h-screen w-screen">
@@ -73,7 +93,20 @@ export default function Home() {
           <FeedCard/>
           
         </div>
-        <div className="col-span-3">hi</div>
+        <div className="col-span-3 p-5">
+          <div className=" p-5 bg-slate-700 rounded-lg ">
+            <h1 className="my-2 text-2xl ">New to Echo ?</h1>
+            <GoogleLogin
+              onSuccess={credentialResponse => {
+                handleLoginWithGoogle(credentialResponse)
+                // console.log(credentialResponse);
+              }}
+              onError={() => {
+                console.log('Login Failed');
+              }}
+            />
+          </div>
+        </div>
       </div>
     </div>
   )
