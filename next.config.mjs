@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains:  ['cdn.vectorstock.com']
+    domains:  ['cdn.vectorstock.com', 'lh3.googleusercontent.com']
   }
 };
 
