@@ -7,6 +7,7 @@ import Image from "next/image";
 import { BsArrowLeftShort } from "react-icons/bs";
 import { graphqlClient } from '@/clients/api';
 import { getUserByIdQuery } from '@/graphql/query/user';
+import Link from 'next/link';
 
 interface ServerProps {
   userInfo?: User
@@ -22,7 +23,9 @@ const UserProfilePage: NextPage<ServerProps> = (props) => {
       <EchoLayout>
         <div>
           <nav className="flex items-center gap-3 py-3 px-3">
-            <BsArrowLeftShort className="text-4xl"/>
+            <Link href='/'>
+              <BsArrowLeftShort className="text-4xl"/>
+            </Link>
             <div>
                 <h1 className="text- xl font-bold">{props?.userInfo?.firstName} {props?.userInfo?.lastName}</h1>
                 <h1 className="text-md font-bold text-slate-500">{props?.userInfo?.posts?.length} Posts</h1>

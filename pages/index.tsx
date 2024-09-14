@@ -7,8 +7,10 @@ import FeedCard from "@/components/FeedCard";
 import Image from "next/image";
 import { GetServerSideProps } from "next";
 import { graphqlClient } from "@/clients/api";
-import { getAllPostsQuery } from "@/graphql/query/post";
-import { useCreatePost } from "@/hooks/post";
+import { getAllPostsQuery, getSignedURLForPostQuery } from "@/graphql/query/post";
+import { useCreatePost, useGetAllPosts } from "@/hooks/post";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 interface HomeProps {
   posts?: Post[]
@@ -17,23 +19,58 @@ interface HomeProps {
 export default function Home(props: HomeProps) {
 
   const { user } = useCurrentUser();  
-  const { mutate } = useCreatePost();
+  const { mutateAsync } = useCreatePost();
+  const {posts = props.posts as Post[]} = useGetAllPosts();
 
-  const [content, setContent] = useState("")
+  const [content, setContent] = useState("");
+  const [imageURL, setImageURL] = useState("");
 
-  const  handleCreatePost = useCallback(() => {
-    mutate({
+  const  handleCreatePost = useCallback(async () => {
+    await mutateAsync({
       content,
-    })
-    setContent("")
-  }, [content, mutate])
+      imageURL
+    }) 
+    setContent('');
+    setImageURL('');
+  }, [content, imageURL, mutateAsync]);
+
+  const handleInputChnageFile = useCallback((input: HTMLInputElement) => {
+    return async (event: Event) => {
+      event.preventDefault();
+      const file: File | null | undefined = input.files?.item(0);
+      if(!file) return;
+
+      const { getSignedURLForPost } = await graphqlClient.request(getSignedURLForPostQuery, {
+        imageName: file.name,
+        imageType: file.type
+      })
+
+      if(getSignedURLForPost){
+        toast.loading('Uploading Image...', {id: '2'});
+        await axios.put(getSignedURLForPost, file, {
+          headers: {
+            'Content-Type': file.type
+          }
+        });
+        toast.success('Upload Success...', {id: '2'});
+
+        const url = new URL(getSignedURLForPost);
+        const myFilePath = `${url.origin}${url.pathname}`;
+        setImageURL(myFilePath);
+      }
+    }
+  }, [])
 
   const handleSelectImage = useCallback(() => {
     const input = document.createElement('input');
     input.setAttribute('type', 'file'); 
     input.setAttribute('accept', 'image/*');
+
+    const handlerFn = handleInputChnageFile(input);
+    input.addEventListener('change', handlerFn);
+
     input.click();
-  }, []);
+  }, [handleInputChnageFile]);
 
   return (
     <div>
@@ -47,6 +84,7 @@ export default function Home(props: HomeProps) {
             </div>
             <div className="col-span-11 ">
               <textarea value={content} onChange={e => setContent(e.target.value)} className="w-full bg-transparent text-xl px-3 border-b border-slate-700" rows={3} placeholder="What's happening?" name="" id=""></textarea>
+              {imageURL && <Image src={imageURL} alt="post-image" width={200} height={200}/>}
               <div className="mt-2 flex justify-between items-center">
                 <BiImageAlt onClick={handleSelectImage} className="text-2xl"/>
                 <button onClick={handleCreatePost} className="py-2 px-4 bg-[#1d9bf0] font-semibold text-sm rounded-full mx-50">Post</button>
@@ -56,7 +94,7 @@ export default function Home(props: HomeProps) {
         </div>
       </div>
       { 
-        props?.posts && props?.posts?.map((post) => post ? <FeedCard key={post?.id} data={post as Post} /> : null )
+        posts && posts?.map((post) => post ? <FeedCard key={post?.id} data={post as Post} /> : null )
       }
     </EchoLayout>
     </div>

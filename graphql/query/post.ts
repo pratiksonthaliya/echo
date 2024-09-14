@@ -6,6 +6,7 @@ export const getAllPostsQuery = graphql(`#graphql
             id
             content
             imageURL
+            createdAt
             author {
                 id
                 firstName
@@ -15,3 +16,9 @@ export const getAllPostsQuery = graphql(`#graphql
         }
     } 
 `); 
+
+export const getSignedURLForPostQuery = graphql(`#graphql
+    query GetSignedURL($imageName: String!, $imageType: String!) {
+        getSignedURLForPost(imageName: $imageName, imageType: $imageType)
+    }
+`)

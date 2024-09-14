@@ -17,6 +17,7 @@ export const getCurrentUserQuery = graphql(`#graphql
             posts {
                 id
                 content
+                createdAt
                 author {
                     id
                     firstName
@@ -37,6 +38,7 @@ export const getUserByIdQuery = graphql(`#graphql
             posts {
                 id
                 content
+                createdAt
                 author {
                     id
                     firstName
