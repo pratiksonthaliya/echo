@@ -13,8 +13,9 @@ import { followUserMutation, unFollowUserMutation } from "@/graphql/mutation/use
 import { useQueryClient } from "@tanstack/react-query";
 import { RequestDocument } from "graphql-request";
 import toast from "react-hot-toast";
-import Modal from "@/components/Model";
 import { useRouter } from "next/router";
+import Modal from "@/components/Model";
+
 
 interface ServerProps {
   userInfo?: User
@@ -133,7 +134,6 @@ const UserProfilePage: NextPage<ServerProps> = (props) => {
                 />
             )}
             <h1 className="text-2xl font-bold mt-5">{props?.userInfo?.firstName} {props?.userInfo?.lastName}</h1>
-            
             <Modal isOpen={showFollowers} onClose={() => setShowFollowers(false)} title="Followers">
               <ul>
                 {props.userInfo?.follower?.map((follower) => (
@@ -173,15 +173,10 @@ const UserProfilePage: NextPage<ServerProps> = (props) => {
                 ))}
               </ul>
             </Modal>
-
             <div className='flex justify-between items-center'>
               <div className='flex gap-4 mt-2 text-sm text-gray-400'>
-                <button onClick={() => setShowFollowers(true)}>
-                  <span> {followerCount} followers</span>
-                </button>
-                <button onClick={() => setShowFollowing(true)}>
-                  <span> {props.userInfo?.following?.length} following</span>
-                </button>
+                <span> {followerCount} followers</span>
+                <span>{props.userInfo?.following?.length} following</span>
               </div>
               {
                 currentUser?.id !== props.userInfo?.id && (
