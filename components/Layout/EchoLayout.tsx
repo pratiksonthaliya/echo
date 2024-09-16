@@ -149,16 +149,36 @@ const EchoLayout: React.FC<EchoLayoutProps> = (props) => {
         </main>
 
         {/* Right Sidebar */}
-        <div className="hidden md:block md:col-span-3 lg:col-span-3 xl:col-span-3 p-4">
-          {!user && (
-            <div className="p-4 bg-slate-700 rounded-lg">
+        <div className="hidden md:block md:col-span-3 p-4">
+          {!user ? (
+            <div className="p-4 bg-slate-800 rounded-lg overflow-hidden">
               <h1 className="mb-4 text-xl lg:text-2xl">New to Echo?</h1>
               <GoogleLogin
                 onSuccess={handleLoginWithGoogle}
                 onError={() => console.log('Login Failed')}
               />
             </div>
-          )}
+          ): (
+            <div>
+              {(user?.recommendedUsers?.length ?? 0)> 0 && (
+                <div className='p-4 bg-slate-800 rounded-lg'>
+                  <h1 className=' mb-4 text-2xl'>Users you may know!</h1>
+                    {user?.recommendedUsers && (
+                    user?.recommendedUsers.map((el) => (
+                      <button onClick={() => router.push(`/${el?.id}`)} key={el?.id} className="flex items-center gap-2 bg-slate-900 rounded-full px-2 py-2 md:px-3 cursor-pointer mb-4 max-w-full">
+                        {el?.profileImageUrl && (
+                          <Image className="rounded-full flex-shrink-0" src={el?.profileImageUrl} alt="user-image" height={35} width={35} />
+                        )}
+                        <div className='hidden md:block overflow-hidden'>
+                          <h3 className="text-sm lg:text-base truncate">{el?.firstName} {el?.lastName}</h3>
+                        </div>
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+          </div>  
+        )}
         </div>
       </div>
     </div>
