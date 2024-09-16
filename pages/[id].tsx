@@ -13,12 +13,15 @@ import { followUserMutation, unFollowUserMutation } from "@/graphql/mutation/use
 import { useQueryClient } from "@tanstack/react-query";
 import { RequestDocument } from "graphql-request";
 import toast from "react-hot-toast";
+import Modal from "@/components/Model";
+import { useRouter } from "next/router";
 
 interface ServerProps {
   userInfo?: User
 }
 
 const UserProfilePage: NextPage<ServerProps> = (props) => {
+  const router = useRouter();
   const { user: currentUser } = useCurrentUser();
   const queryClient = useQueryClient();
   const [followerCount, setFollowerCount] = useState<number>(props?.userInfo?.follower?.length ?? 0);
@@ -99,6 +102,13 @@ const UserProfilePage: NextPage<ServerProps> = (props) => {
   //   await queryClient.invalidateQueries({ queryKey: ['current-user'], refetchType: 'all' })
   // }, [props.userInfo?.id, queryClient])
 
+  const [showFollowers, setShowFollowers] = useState(false);  // To manage followers modal
+  const [showFollowing, setShowFollowing] = useState(false);  // To manage following modal
+
+  useEffect(() => {
+    setFollowerCount(props?.userInfo?.follower?.length ?? 0);
+  }, [props?.userInfo?.follower?.length]);
+
   return (
     <div>
       <EchoLayout>
@@ -123,10 +133,55 @@ const UserProfilePage: NextPage<ServerProps> = (props) => {
                 />
             )}
             <h1 className="text-2xl font-bold mt-5">{props?.userInfo?.firstName} {props?.userInfo?.lastName}</h1>
+            
+            <Modal isOpen={showFollowers} onClose={() => setShowFollowers(false)} title="Followers">
+              <ul>
+                {props.userInfo?.follower?.map((follower) => (
+                  <button key={follower?.id} onClick={() => {
+                    setShowFollowers(false)
+                    router.push(`/${follower?.id}`);
+                  }}>
+                    <div className="flex items-center gap-2 bg-slate-800 rounded-full px-2 py-2 md:px-3 cursor-pointer mb-4 max-w-full">
+                      {follower?.profileImageUrl && (
+                        <Image className="rounded-full flex-shrink-0" src={follower?.profileImageUrl} alt="user-image" height={30} width={30} />
+                      )}
+                      <div className='hidden md:block overflow-hidden'>
+                        <h3 className="text-sm lg:text-md truncate">{follower?.firstName} {follower?.lastName}</h3>
+                      </div>
+                    </div>
+                  </button> 
+                ))}
+              </ul>
+            </Modal>
+
+            <Modal isOpen={showFollowing} onClose={() => setShowFollowing(false)} title="Following">
+              <ul>
+                {props.userInfo?.following?.map((followed) => (
+                  <button key={followed?.id} onClick={() => {
+                    setShowFollowing(false)
+                    router.push(`/${followed?.id}`);
+                  }}>
+                    <div className="flex items-center gap-2 bg-slate-800 rounded-full px-2 py-2 md:px-3 cursor-pointer mb-4 max-w-full">
+                      {followed?.profileImageUrl && (
+                        <Image className="rounded-full flex-shrink-0" src={followed?.profileImageUrl} alt="user-image" height={30} width={30} />
+                      )}
+                      <div className='hidden md:block overflow-hidden'>
+                        <h3 className="text-sm lg:text-md truncate">{followed?.firstName} {followed?.lastName}</h3>
+                      </div>
+                    </div>
+                  </button> 
+                ))}
+              </ul>
+            </Modal>
+
             <div className='flex justify-between items-center'>
               <div className='flex gap-4 mt-2 text-sm text-gray-400'>
-                <span> {followerCount} followers</span>
-                <span>{props.userInfo?.following?.length} following</span>
+                <button onClick={() => setShowFollowers(true)}>
+                  <span> {followerCount} followers</span>
+                </button>
+                <button onClick={() => setShowFollowing(true)}>
+                  <span> {props.userInfo?.following?.length} following</span>
+                </button>
               </div>
               {
                 currentUser?.id !== props.userInfo?.id && (
