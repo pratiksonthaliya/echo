@@ -71,7 +71,7 @@ const EchoLayout: React.FC<EchoLayoutProps> = (props) => {
       e.preventDefault(); // Prevent the link from navigating
       toast.error("Please Login to access this page!");
     } else {
-      router.push(`/profile/${user.id}`);
+      router.push(`/${user.id}`);
     }
   };
 

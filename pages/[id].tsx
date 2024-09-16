@@ -13,6 +13,7 @@ import { followUserMutation, unFollowUserMutation } from "@/graphql/mutation/use
 import { useQueryClient } from "@tanstack/react-query";
 import { RequestDocument } from "graphql-request";
 import toast from "react-hot-toast";
+import Modal from "@/components/Model";
 
 interface ServerProps {
   userInfo?: User
@@ -99,6 +100,13 @@ const UserProfilePage: NextPage<ServerProps> = (props) => {
   //   await queryClient.invalidateQueries({ queryKey: ['current-user'], refetchType: 'all' })
   // }, [props.userInfo?.id, queryClient])
 
+  const [showFollowers, setShowFollowers] = useState(false);  // To manage followers modal
+  const [showFollowing, setShowFollowing] = useState(false);  // To manage following modal
+
+  useEffect(() => {
+    setFollowerCount(props?.userInfo?.follower?.length ?? 0);
+  }, [props?.userInfo?.follower?.length]);
+
   return (
     <div>
       <EchoLayout>
@@ -123,10 +131,33 @@ const UserProfilePage: NextPage<ServerProps> = (props) => {
                 />
             )}
             <h1 className="text-2xl font-bold mt-5">{props?.userInfo?.firstName} {props?.userInfo?.lastName}</h1>
+            
+            <Modal isOpen={showFollowers} onClose={() => setShowFollowers(false)} title="Followers">
+              <ul>
+                {props.userInfo?.follower?.map((follower) => (
+                  <li key={follower?.id}>{follower?.firstName} {follower?.lastName}</li>
+                ))}
+              </ul>
+            </Modal>
+
+            <Modal isOpen={showFollowing} onClose={() => setShowFollowing(false)} title="Following">
+              <ul>
+                {props.userInfo?.following?.map((followed) => (
+                  <li key={followed?.id}>{followed?.firstName} {followed?.lastName}</li>
+                ))}
+              </ul>
+            </Modal>
+
             <div className='flex justify-between items-center'>
               <div className='flex gap-4 mt-2 text-sm text-gray-400'>
-                <span> {followerCount} followers</span>
-                <span>{props.userInfo?.following?.length} following</span>
+                {/* <span> {followerCount} followers</span>
+                <span> {props.userInfo?.following?.length} following</span> */}
+                <button onClick={() => setShowFollowers(true)}>
+                  <span> {followerCount} followers</span>
+                </button>
+                <button onClick={() => setShowFollowing(true)}>
+                  <span> {props.userInfo?.following?.length} following</span>
+                </button>
               </div>
               {
                 currentUser?.id !== props.userInfo?.id && (
