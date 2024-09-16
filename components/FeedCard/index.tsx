@@ -28,7 +28,9 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
     <div className='p-5 border-t-[0.5px] border-gray-700 hover:bg-gray-900 transition-all cursor-pointer '>
       <div className='grid grid-cols-12 gap-2'>
         <div className='col-span-1 gap-3'>
+        <Link href={`/${data?.author?.id}`}>
           {data?.author?.profileImageUrl && <Image alt="user-image" src={data?.author?.profileImageUrl} height={50} width={50} className='rounded-full' />} 
+        </Link>
         </div>
         <div className='col-span-11'>
           <div className='flex gap-2'>

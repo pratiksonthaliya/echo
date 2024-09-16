@@ -25,14 +25,24 @@ export default function Home(props: HomeProps) {
   const [content, setContent] = useState("");
   const [imageURL, setImageURL] = useState("");
 
-  const  handleCreatePost = useCallback(async () => {
+  const handleCreatePost = useCallback(async () => {
+    if(!user || !user?.id){
+      toast.error('Please Login to Post!');
+      return;
+    }
+
+    if(!content && !imageURL){
+      toast.error('Please Write something or Add a photo to Post!');
+      return;
+    }
+
     await mutateAsync({
       content,
       imageURL
     }) 
     setContent('');
     setImageURL('');
-  }, [content, imageURL, mutateAsync]);
+  }, [content, imageURL, mutateAsync, user]);
 
   const handleInputChnageFile = useCallback((input: HTMLInputElement) => {
     return async (event: Event) => {
@@ -62,6 +72,10 @@ export default function Home(props: HomeProps) {
   }, [])
 
   const handleSelectImage = useCallback(() => {
+    if(!user || !user?.id){
+      toast.error('Please Login to Add a Image!');
+      return;
+    }
     const input = document.createElement('input');
     input.setAttribute('type', 'file'); 
     input.setAttribute('accept', 'image/*');
@@ -70,7 +84,7 @@ export default function Home(props: HomeProps) {
     input.addEventListener('change', handlerFn);
 
     input.click();
-  }, [handleInputChnageFile]);
+  }, [handleInputChnageFile, user]);
 
   return (
     <div>

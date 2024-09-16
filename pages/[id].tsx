@@ -12,6 +12,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { followUserMutation, unFollowUserMutation } from "@/graphql/mutation/user";
 import { useQueryClient } from "@tanstack/react-query";
 import { RequestDocument } from "graphql-request";
+import toast from "react-hot-toast";
 
 interface ServerProps {
   userInfo?: User
@@ -37,6 +38,9 @@ const UserProfilePage: NextPage<ServerProps> = (props) => {
   }, [props.userInfo?.id]);
 
   const handleFollowUser = useCallback(async () => {
+    if(!currentUser){
+      toast.error('Please Login to Follow a User!')
+    }
     if (!props.userInfo?.id) return;
 
     // Optimistically increase follower count
@@ -54,7 +58,7 @@ const UserProfilePage: NextPage<ServerProps> = (props) => {
       console.error("Error following user:", error);
       setFollowerCount((prev) => prev - 1); // Revert if error
     }
-  }, [props.userInfo?.id, queryClient, fetchUpdatedFollowerCount]);
+  }, [currentUser, props.userInfo?.id, queryClient, fetchUpdatedFollowerCount]);
 
   const handleUnfollowUser = useCallback(async () => {
     if (!props.userInfo?.id) return;
