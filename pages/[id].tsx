@@ -8,13 +8,13 @@ import { graphqlClient } from '@/clients/api';
 import { getUserByIdQuery } from '@/graphql/query/user';
 import Link from 'next/link';
 import { useCurrentUser } from '@/hooks/user';
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { followUserMutation, unFollowUserMutation } from "@/graphql/mutation/user";
 import { useQueryClient } from "@tanstack/react-query";
-import { RequestDocument } from "graphql-request";
 import toast from "react-hot-toast";
 import { useRouter } from "next/router";
 import Modal from "@/components/Model";
+import debounce from 'lodash.debounce';
 
 
 interface ServerProps {
@@ -22,9 +22,11 @@ interface ServerProps {
 }
 
 const UserProfilePage: NextPage<ServerProps> = (props) => {
+  const {userInfo} = props;
   const router = useRouter();
   const { user: currentUser } = useCurrentUser();
   const queryClient = useQueryClient();
+  const [loading, setLoading] = useState(false);
   const [followerCount, setFollowerCount] = useState<number>(props?.userInfo?.follower?.length ?? 0);
 
   const amIFollowing = useMemo(()=>{
@@ -32,83 +34,38 @@ const UserProfilePage: NextPage<ServerProps> = (props) => {
     return (currentUser?.following?.findIndex(el => el?.id === props?.userInfo?.id) ?? -1 ) >= 0
   }, [currentUser?.following, props.userInfo]);
 
-  const fetchUpdatedFollowerCount = useCallback(async () => {
-    try {
-      const { getUserById } = await graphqlClient.request(getUserByIdQuery, { id: props.userInfo?.id as string});
-      setFollowerCount(getUserById?.follower?.length || 0); // Update the state with the fresh follower count
-    } catch (error) {
-      console.error("Error fetching updated follower count:", error);
-    }
-  }, [props.userInfo?.id]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const updateFollowStatus = useCallback(
+    debounce(async (isFollow: boolean) => {
+      if (!currentUser) {
+        toast.error("Please login to follow/unfollow!");
+        return;
+      }
+      if (!userInfo?.id || loading) return; // Prevent further clicks when loading
 
-  const handleFollowUser = useCallback(async () => {
-    if(!currentUser){
-      toast.error('Please Login to Follow a User!')
-    }
-    if (!props.userInfo?.id) return;
+      setLoading(true);  // Set loading to true
+      setFollowerCount((prev) => prev + (isFollow ? 1 : -1));
 
-    // Optimistically increase follower count
-    setFollowerCount((prev) => prev + 1);
+      try {
+        const mutation = isFollow ? followUserMutation : unFollowUserMutation;
+        await graphqlClient.request(mutation, { to: userInfo?.id });
 
-    try {
-      await graphqlClient.request(followUserMutation as RequestDocument, { to: props.userInfo?.id });
+        await queryClient.invalidateQueries({ queryKey: ["current-user"], refetchType: "all" });
+        toast.success(`${isFollow ? "Followed" : "Unfollowed"} successfully!`);
 
-      // Invalidate the current user query to reflect updated following state
-      await queryClient.invalidateQueries({ queryKey: ["current-user"], refetchType: "all" });
-
-      // Fetch updated follower count from server
-      await fetchUpdatedFollowerCount();
-    } catch (error) {
-      console.error("Error following user:", error);
-      setFollowerCount((prev) => prev - 1); // Revert if error
-    }
-  }, [currentUser, props.userInfo?.id, queryClient, fetchUpdatedFollowerCount]);
-
-  const handleUnfollowUser = useCallback(async () => {
-    if (!props.userInfo?.id) return;
-
-    // Optimistically decrease follower count
-    setFollowerCount((prev) => prev - 1);
-
-    try {
-      await graphqlClient.request(unFollowUserMutation as RequestDocument, { to: props.userInfo?.id });
-
-      // Invalidate the current user query to reflect updated following state
-      await queryClient.invalidateQueries({ queryKey: ["current-user"], refetchType: "all" });
-
-      // Fetch updated follower count from server
-      await fetchUpdatedFollowerCount();
-    } catch (error) {
-      console.error("Error unfollowing user:", error);
-      setFollowerCount((prev) => prev + 1); // Revert if error
-    }
-  }, [props.userInfo?.id, queryClient, fetchUpdatedFollowerCount]);
-
-  useEffect(() => {
-    setFollowerCount(props?.userInfo?.follower?.length ?? 0); // Initialize follower count from server-side props
-  }, [props?.userInfo?.follower?.length]);
-
-  // const handleFollowUser = useCallback(async () => {
-  //   if(!props.userInfo?.id) return;
-
-  //   await graphqlClient.request(followUserMutation as RequestDocument, { to: props.userInfo?.id })
-  //   await queryClient.invalidateQueries({ queryKey: ['current-user'], refetchType: 'all' })
-
-  // }, [props.userInfo?.id, queryClient])
-
-  // const handleUnfollowUser = useCallback(async () => {
-  //   if(!props.userInfo?.id) return;
-
-  //   await graphqlClient.request(unFollowUserMutation as RequestDocument, { to: props.userInfo?.id })
-  //   await queryClient.invalidateQueries({ queryKey: ['current-user'], refetchType: 'all' })
-  // }, [props.userInfo?.id, queryClient])
+      } catch (error) {
+        setFollowerCount((prev) => prev + (isFollow ? -1 : 1));  // Rollback follower count in case of error
+        toast.error(`Failed to ${isFollow ? "follow" : "unfollow"}. Please try again.`);
+      } 
+      finally {
+        setLoading(false);  // Reset loading
+      }
+    }, 300),  // Debounce delay
+    [currentUser, queryClient, userInfo?.id, loading]
+  );
 
   const [showFollowers, setShowFollowers] = useState(false);  // To manage followers modal
   const [showFollowing, setShowFollowing] = useState(false);  // To manage following modal
-
-  useEffect(() => {
-    setFollowerCount(props?.userInfo?.follower?.length ?? 0);
-  }, [props?.userInfo?.follower?.length]);
 
   return (
     <div>
@@ -180,14 +137,12 @@ const UserProfilePage: NextPage<ServerProps> = (props) => {
               </div>
               {
                 currentUser?.id !== props.userInfo?.id && (
-                  <>
-                    {
-                      amIFollowing ? 
-                      <button onClick={handleUnfollowUser} className='bg-white text-black py-1 px-3 rounded-full text-sm'>Unfollow</button> 
-                      : 
-                      <button onClick={handleFollowUser} className='bg-white text-black py-1 px-3 rounded-full text-sm'>Follow</button>
-                    }
-                  </>
+                  <button
+                    onClick={() => updateFollowStatus(!amIFollowing)}
+                    className="bg-white text-black py-1 px-3 rounded-full text-sm"
+                  >
+                    {amIFollowing ? "Unfollow" : "Follow"}
+                  </button>
                 )
               }
             </div>
