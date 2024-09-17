@@ -84,7 +84,7 @@ const EchoLayout: React.FC<EchoLayoutProps> = (props) => {
       const { verifyGoogleToken }  = await graphqlClient.request(verifyUserGoogleTokenQuery , {token: googleToken});
 
       toast.success(`Verified Successful`) 
-      console.log(verifyGoogleToken);
+      // console.log(verifyGoogleToken);
       
       if(verifyGoogleToken) window.localStorage.setItem('__echo_token', verifyGoogleToken);
 
@@ -150,7 +150,7 @@ const EchoLayout: React.FC<EchoLayoutProps> = (props) => {
 
         {/* Right Sidebar */}
         <div className="hidden md:block md:col-span-3 p-4">
-          {!user ? (
+          {(!user || !user?.id) ? (
             <div className="p-4 bg-slate-800 rounded-lg overflow-hidden">
               <h1 className="mb-4 text-xl lg:text-2xl">New to Echo?</h1>
               <GoogleLogin
@@ -164,17 +164,18 @@ const EchoLayout: React.FC<EchoLayoutProps> = (props) => {
                 <div className='p-4 bg-slate-800 rounded-lg'>
                   <h1 className=' mb-4 text-2xl'>Users you may know!</h1>
                     {user?.recommendedUsers && (
-                    user?.recommendedUsers.map((el) => (
-                      <button onClick={() => router.push(`/${el?.id}`)} key={el?.id} className="flex items-center gap-2 bg-slate-900 rounded-full px-2 py-2 md:px-3 cursor-pointer mb-4 max-w-full">
-                        {el?.profileImageUrl && (
-                          <Image className="rounded-full flex-shrink-0" src={el?.profileImageUrl} alt="user-image" height={35} width={35} />
-                        )}
-                        <div className='hidden md:block overflow-hidden'>
-                          <h3 className="text-sm lg:text-base truncate">{el?.firstName} {el?.lastName}</h3>
+                      user?.recommendedUsers.map((el) => (
+                        <div key={el?.id} className='flex items-center gap-2 px-2 py-2 md:px-3 cursor-pointer mb-4 max-w-full'>
+                          {el?.profileImageUrl && (
+                            <Image className="rounded-full flex-shrink-0" src={el?.profileImageUrl} alt="user-image" height={40} width={40} />
+                          )}
+                          <div className='hidden md:block overflow-hidden'>
+                            <h3 className="text-sm lg:text-lg truncate">{el?.firstName} {el?.lastName}</h3>
+                            <button className='bg-slate-500 px-3 text-sm rounded-full flex items-start' onClick={() => router.push(`/${el?.id}`)}>View</button>
+                          </div>  
                         </div>
-                      </button>
-                    ))
-                  )}
+                      ))
+                    )}
                 </div>
               )}
           </div>  

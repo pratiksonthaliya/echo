@@ -5,6 +5,8 @@ import { BiMessageRounded, BiUpload } from 'react-icons/bi'
 import { FaRetweet } from 'react-icons/fa'
 import { Maybe, Post } from '@/gql/graphql'
 import Link from 'next/link'
+import { format } from 'date-fns';
+
 
 interface FeedCardProps  {
   data: Post 
@@ -12,18 +14,27 @@ interface FeedCardProps  {
 
 const FeedCard: React.FC<FeedCardProps> = (props) => {
   const {data} = props;
+  console.log(data?.createdAt);
+
   const createdAt: Maybe<string> | undefined = data?.createdAt;
-  const timestamp = createdAt && !isNaN(Number(createdAt)) ? Number(createdAt) : undefined;
-  const formattedDate = timestamp
-    ? Intl.DateTimeFormat('en-US', { 
-        month: 'short', 
-        day: 'numeric', 
-        // year: 'numeric', 
-        hour: 'numeric', 
-        minute: 'numeric', 
-        hour12: true 
-    }).format(new Date(timestamp))
-    : 'Invalid Date or Time';
+
+    let dateObject: Date | null = null;
+
+    if (createdAt) {
+        // Check if the createdAt is a Unix timestamp
+        const timestamp = Number(createdAt);
+        if (!isNaN(timestamp) && timestamp.toString().length === 13) { // 13 digits for milliseconds
+            dateObject = new Date(timestamp);
+        } else {
+            dateObject = new Date(createdAt);
+        }
+    }
+
+    // Format the date
+    const formattedDate = dateObject
+        ? format(dateObject, 'MMM d, h:mm a')
+        : 'Invalid Date or Time';
+ 
   return (
     <div className='p-5 border-t-[0.5px] border-gray-700 hover:bg-gray-900 transition-all cursor-pointer '>
       <div className='grid grid-cols-12 gap-2'>
