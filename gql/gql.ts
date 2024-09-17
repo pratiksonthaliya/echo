@@ -13,9 +13,11 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Therefore it is highly recommended to use the babel or swc plugin for production.
  */
 const documents = {
+    "#graphql\n    mutation ToggleLike($postId: ID!) {\n        toggleLike(postId: $postId) {\n            isLiked\n            like {\n                id\n                post {\n                    id\n                    content\n                    imageURL\n                    createdAt\n                }\n                user {\n                    id\n                    firstName\n                    lastName\n                    email\n                    profileImageUrl\n                }\n            }\n        }\n    }\n": types.ToggleLikeDocument,
     "#graphql\n    mutation createPost($payload: CreatePostData!) {\n        createPost(payload: $payload ) {\n            id\n        }\n    } \n": types.CreatePostDocument,
     "#graphql\n    mutation FollowUser($to: ID!){\n        followUser(to: $to)\n    }\n": types.FollowUserDocument,
     "#graphql\n    mutation UnFollowUser($to: ID!) {\n        unFollowUser(to: $to)\n    } \n": types.UnFollowUserDocument,
+    "#graphql\n        \n    query GetPostLikes($postId: ID!) {\n        getPostLikes(postId: $postId) {\n            id\n            post {\n                id\n                content\n                imageURL\n                createdAt\n            }\n            user {\n                id\n                firstName\n                lastName\n                email\n                profileImageUrl\n            }\n        }\n    }\n": types.GetPostLikesDocument,
     "#graphql\n    query GetAllPosts {\n        getAllPosts {\n            id\n            content\n            imageURL\n            createdAt\n            author {\n                id\n                firstName\n                lastName\n                profileImageUrl\n            }\n        }\n    } \n": types.GetAllPostsDocument,
     "#graphql\n    query GetSignedURL($imageName: String!, $imageType: String!) {\n        getSignedURLForPost(imageName: $imageName, imageType: $imageType)\n    }\n": types.GetSignedUrlDocument,
     "#graphql\n    query VerifyUserGoogleToken($token: String!){\n        verifyGoogleToken(token: $token)\n    }\n": types.VerifyUserGoogleTokenDocument,
@@ -40,6 +42,10 @@ export function graphql(source: string): unknown;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "#graphql\n    mutation ToggleLike($postId: ID!) {\n        toggleLike(postId: $postId) {\n            isLiked\n            like {\n                id\n                post {\n                    id\n                    content\n                    imageURL\n                    createdAt\n                }\n                user {\n                    id\n                    firstName\n                    lastName\n                    email\n                    profileImageUrl\n                }\n            }\n        }\n    }\n"): (typeof documents)["#graphql\n    mutation ToggleLike($postId: ID!) {\n        toggleLike(postId: $postId) {\n            isLiked\n            like {\n                id\n                post {\n                    id\n                    content\n                    imageURL\n                    createdAt\n                }\n                user {\n                    id\n                    firstName\n                    lastName\n                    email\n                    profileImageUrl\n                }\n            }\n        }\n    }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "#graphql\n    mutation createPost($payload: CreatePostData!) {\n        createPost(payload: $payload ) {\n            id\n        }\n    } \n"): (typeof documents)["#graphql\n    mutation createPost($payload: CreatePostData!) {\n        createPost(payload: $payload ) {\n            id\n        }\n    } \n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -49,6 +55,10 @@ export function graphql(source: "#graphql\n    mutation FollowUser($to: ID!){\n 
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "#graphql\n    mutation UnFollowUser($to: ID!) {\n        unFollowUser(to: $to)\n    } \n"): (typeof documents)["#graphql\n    mutation UnFollowUser($to: ID!) {\n        unFollowUser(to: $to)\n    } \n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "#graphql\n        \n    query GetPostLikes($postId: ID!) {\n        getPostLikes(postId: $postId) {\n            id\n            post {\n                id\n                content\n                imageURL\n                createdAt\n            }\n            user {\n                id\n                firstName\n                lastName\n                email\n                profileImageUrl\n            }\n        }\n    }\n"): (typeof documents)["#graphql\n        \n    query GetPostLikes($postId: ID!) {\n        getPostLikes(postId: $postId) {\n            id\n            post {\n                id\n                content\n                imageURL\n                createdAt\n            }\n            user {\n                id\n                firstName\n                lastName\n                email\n                profileImageUrl\n            }\n        }\n    }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
