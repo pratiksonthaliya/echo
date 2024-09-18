@@ -116,10 +116,22 @@ export default function Home(props: HomeProps) {
 }
 
 export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
-  const allPosts = await graphqlClient.request(getAllPostsQuery);
-  return {
-    props: {
-      posts: allPosts.getAllPosts as Post[],
+  try {
+    const allPosts = await graphqlClient.request(getAllPostsQuery);
+    if (!allPosts || !allPosts?.getAllPosts) {
+      return {
+        props: { posts: [] },
+      };
     }
+
+    return {
+      props: { posts: allPosts.getAllPosts as Post[]},
+    };
+  } catch (error) {
+    // console.error('Error fetching posts:', error);
+
+    return {
+      props: { posts: [] }, // Or you could return { notFound: true }
+    };
   }
 }
