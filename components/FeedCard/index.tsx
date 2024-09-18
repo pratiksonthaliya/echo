@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import React from 'react'
 import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai'
-import { BiMessageRounded, BiUpload } from 'react-icons/bi'
+import { BiBookmark, BiMessageRounded, BiSolidBookmark } from 'react-icons/bi'
 import { FaRetweet } from 'react-icons/fa'
 import { Maybe, Post } from '@/gql/graphql'
 import Link from 'next/link'
@@ -12,7 +12,8 @@ import { toggleLikeMutation } from '@/graphql/mutation/like'
 import toast from 'react-hot-toast'
 import { usePostLikes } from '@/hooks/like'
 import { useCurrentUser } from '@/hooks/user'
-
+import { toggleBookmarkMutation } from '@/graphql/mutation/bookmark'
+import GetBookmarks from '../GetBookmarks'
 
 interface FeedCardProps  {
   data: Post 
@@ -34,15 +35,19 @@ const handleDate = (createdAt: Maybe<string> | undefined) => {
 const FeedCard: React.FC<FeedCardProps> = (props) => {
   const {data} = props;
   const {user} = useCurrentUser();
+
   const postId = data?.id;
+  const userId = user?.id;
   const queryClient = useQueryClient();
 
   const { data: likeData } = usePostLikes(postId);
-
+  const bookmarkData = GetBookmarks(userId as string); // useUserBookmarks(userId as string);
+  
   const likeCount = likeData?.getPostLikes?.length ?? 0;
   const isLiked = likeData?.getPostLikes?.some((like) => like?.user?.id === user?.id) && likeCount > 0;
+  const isBookmarked = user ? bookmarkData?.getUserBookmarks?.some((bookmark) => bookmark?.post?.id === postId) : false;
 
-  const mutation = useMutation({
+  const likeMutation = useMutation({
     mutationFn: () => graphqlClient.request(toggleLikeMutation, { postId }),
     // onMutate: () =>  toast.custom('❤️', { id: '2'}, ),
     onSuccess: (data) => {
@@ -54,12 +59,31 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
     },
   });
 
+  const bookmarkMutation = useMutation({
+    mutationFn: () => graphqlClient.request(toggleBookmarkMutation, { postId }),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({queryKey: ["add-bookmark", userId], refetchType: 'all'});
+      toast.success(data.toggleBookmark.isBookmarked ? 'Bookmarked!' : 'Removed From Bookmark!', { id: '3' });
+    },
+    onError: (error: Error) => {
+      toast.error(`Error: ${error.message}`, { id: '3' });
+    },
+  });
+
   const handleLike = () => {
-    if(!user){
+    if(!user || !user?.id){
       toast.error('Please login to Like a Post!');
       return;
     }
-    mutation.mutate();
+    likeMutation.mutate();
+  };
+
+  const handleBookmark = () => {
+    if(!user || !user?.id){
+      toast.error('Please login to Bookmark a Post!');
+      return;
+    }
+    bookmarkMutation.mutate();
   };
 
   const formattedDate = handleDate(data?.createdAt);
@@ -96,7 +120,11 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
               {likeCount} likes
               </span>
             </div>
-            <div><BiUpload/></div>
+            <div onClick={handleBookmark} className='cursor-pointer flex gap-1 items-center'>
+              <span>
+              {isBookmarked ? <BiSolidBookmark color='skyblue' /> : <BiBookmark />}
+              </span>
+            </div>
           </div>
         </div>
       </div>

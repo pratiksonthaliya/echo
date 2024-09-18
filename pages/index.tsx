@@ -1,6 +1,5 @@
 import { useCallback, useState } from "react";
 import { useCurrentUser } from "@/hooks/user";
-import { Post } from "@/gql/graphql";
 import EchoLayout from "@/components/Layout/EchoLayout";
 import { BiImageAlt } from "react-icons/bi";
 import FeedCard from "@/components/FeedCard";
@@ -11,6 +10,7 @@ import { getAllPostsQuery, getSignedURLForPostQuery } from "@/graphql/query/post
 import { useCreatePost, useGetAllPosts } from "@/hooks/post";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { Post } from "@/gql/graphql";
 
 interface HomeProps {
   posts?: Post[]

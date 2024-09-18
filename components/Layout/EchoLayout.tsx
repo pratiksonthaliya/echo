@@ -1,7 +1,7 @@
 import { useCurrentUser } from '@/hooks/user';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 import React, { useCallback } from 'react'
-import { BiSolidHome, BiUser } from "react-icons/bi";
+import { BiBookmark, BiSolidHome, BiUser } from "react-icons/bi";
 import { LiaTeamspeak } from 'react-icons/lia';
 import Image from "next/image";
 import toast from 'react-hot-toast';
@@ -27,6 +27,8 @@ const EchoLayout: React.FC<EchoLayoutProps> = (props) => {
   const router = useRouter();
   const { user } = useCurrentUser();  
   const queryClient = useQueryClient();
+
+  
 
 //   const sideBarMenuItems:EchoSideButton[] = useMemo(() => [
 //     {
@@ -66,12 +68,21 @@ const EchoLayout: React.FC<EchoLayoutProps> = (props) => {
 //     }
 //  ], [user?.id])
 
-  const handleClick = (e: { preventDefault: () => void; }) => {
+  const handleClickProfile = (e: { preventDefault: () => void; }) => {
     if (!user?.id) {
       e.preventDefault(); // Prevent the link from navigating
       toast.error("Please Login to access this page!");
     } else {
       router.push(`/${user.id}`);
+    }
+  };
+
+  const handleClickBookmark = (e: { preventDefault: () => void; }) => {
+    if (!user?.id) {
+      e.preventDefault(); // Prevent the link from navigating
+      toast.error("Please Login to access this page!");
+    } else {
+      router.push(`/bookmarks`);
     }
   };
 
@@ -124,9 +135,13 @@ const EchoLayout: React.FC<EchoLayoutProps> = (props) => {
                 <span className="text-2xl md:text-3xl"><BiSolidHome /></span>
                 <span className='hidden md:inline md:text-xl'>Home</span>
               </Link>
-              <div className="flex items-center gap-4 hover:bg-gray-800 rounded-full px-2 py-2 md:px-4 cursor-pointer" onClick={handleClick}>
+              <div className="flex items-center gap-4 hover:bg-gray-800 rounded-full px-2 py-2 md:px-4 cursor-pointer" onClick={handleClickProfile}>
                 <span className="text-2xl md:text-3xl"><BiUser /></span>
                 <span className='hidden md:inline md:text-xl'>Profile</span>
+              </div>
+              <div className="flex items-center gap-4 hover:bg-gray-800 rounded-full px-2 py-2 md:px-4 cursor-pointer" onClick={handleClickBookmark}>
+                <span className="text-2xl md:text-3xl"><BiBookmark /></span>
+                <span className='hidden md:inline md:text-xl'>Bookmarks</span>
               </div>
             </nav>
           </div>
