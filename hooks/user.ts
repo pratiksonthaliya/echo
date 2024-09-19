@@ -1,5 +1,5 @@
 import { graphqlClient } from "@/clients/api"
-import { getCurrentUserQuery, getUserByIdQuery } from "@/graphql/query/user"
+import { getCurrentUserQuery, getLikedPostsByUserQuery, getUserByIdQuery } from "@/graphql/query/user"
 import { useQuery } from "@tanstack/react-query"
 
 export const useCurrentUser = () => {
@@ -22,3 +22,12 @@ export const useUserbyId = (userId: string) => {
 
     return {...query, user: query.data?.getUserById};
 }
+
+export const useGetLikedPostByUser = (userId: string) => {
+    const query = useQuery({
+        queryKey: ["liked-posts", userId],
+        queryFn: () => graphqlClient.request(getLikedPostsByUserQuery, {id: userId})
+    })
+
+    return {...query, posts: query.data?.getLikedPostsByUser}
+}  

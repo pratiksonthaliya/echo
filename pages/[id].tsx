@@ -22,7 +22,7 @@ interface ServerProps {
 }
 
 const UserProfilePage: NextPage<ServerProps> = (props) => {
-  const userInfo = useUserbyId(props?.userInfo?.id ?? "")?.data?.getUserById;
+  const userInfo = useUserbyId(props?.userInfo?.id as string)?.data?.getUserById;
   const router = useRouter();
   const { user: currentUser } = useCurrentUser();
   const queryClient = useQueryClient();
@@ -77,6 +77,14 @@ const UserProfilePage: NextPage<ServerProps> = (props) => {
 
   const [showFollowers, setShowFollowers] = useState(false);  // To manage followers modal
   const [showFollowing, setShowFollowing] = useState(false);  // To manage following modal
+
+  if(!props?.userInfo || !props?.userInfo?.id){
+    return <div>
+      <EchoLayout>
+        <div></div>
+      </EchoLayout>
+    </div>
+  }
 
   return (
     <div>
@@ -171,11 +179,17 @@ export const getServerSideProps: GetServerSideProps<ServerProps> = async (contex
   const id = context.query.id as string | undefined;
   if(!id) return { notFound: true, props: {userInfo: undefined }}
 
-  const userInfo = await graphqlClient.request(getUserByIdQuery, { id });
-  if(!userInfo?.getUserById) return {notFound: true, props: {userInfo: undefined }}
+  try {
+    const userInfo = await graphqlClient.request(getUserByIdQuery, { id });
+    if(!userInfo?.getUserById) return {notFound: true, props: {userInfo: undefined }}
 
-  return {
-    props: { userInfo: userInfo.getUserById as User },
+    return {
+      props: { userInfo: userInfo.getUserById as User },
+    }
+  } catch (error) {
+    return {
+      props: { userInfo: {} as User }, // Or you could return { notFound: true }
+    };
   }
 }
 

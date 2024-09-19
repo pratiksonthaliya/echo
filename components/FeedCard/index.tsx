@@ -56,6 +56,7 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
     // onMutate: () =>  toast.custom('❤️', { id: '2'}, ),
     onSuccess: (data) => {
       queryClient.invalidateQueries({queryKey: ["post-likes", postId], refetchType: 'all'});
+      queryClient.invalidateQueries({queryKey: ["liked-posts", userId], refetchType: 'all'});
       toast.success(data.toggleLike.isLiked ? 'Liked!❤️' : 'Unliked!', { id: '2' });
     },
     onError: (error: Error) => {

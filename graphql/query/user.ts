@@ -79,3 +79,20 @@ export const getUserByIdQuery = graphql(`#graphql
         }
     }
 `)
+
+export const getLikedPostsByUserQuery = graphql(`#graphql
+    query GetLikedPostsByUser($id: ID!){
+        getLikedPostsByUser(id: $id){
+            id
+            content
+            imageURL
+            createdAt
+            author {
+                id
+                firstName
+                lastName
+                profileImageUrl
+            }
+        }
+    }
+`)

@@ -10,6 +10,7 @@ import { graphqlClient } from '@/clients/api';
 import { verifyUserGoogleTokenQuery } from '@/graphql/query/user';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { AiOutlineHeart } from 'react-icons/ai';
 
 interface EchoLayoutProps {
     children: React.ReactNode
@@ -27,8 +28,6 @@ const EchoLayout: React.FC<EchoLayoutProps> = (props) => {
   const router = useRouter();
   const { user } = useCurrentUser();  
   const queryClient = useQueryClient();
-
-  
 
 //   const sideBarMenuItems:EchoSideButton[] = useMemo(() => [
 //     {
@@ -86,6 +85,15 @@ const EchoLayout: React.FC<EchoLayoutProps> = (props) => {
     }
   };
 
+  const handleClickLikedPosts = (e: { preventDefault: () => void; }) => {
+    if (!user?.id) {
+      e.preventDefault(); // Prevent the link from navigating
+      toast.error("Please Login to access this page!");
+    } else {
+      router.push(`/likedPosts`);
+    }
+  };
+
   const handleLoginWithGoogle = useCallback( async (credentialResponse: CredentialResponse) => {
     const googleToken = credentialResponse.credential;
 
@@ -138,6 +146,10 @@ const EchoLayout: React.FC<EchoLayoutProps> = (props) => {
               <div className="flex items-center gap-4 hover:bg-gray-800 rounded-full px-2 py-2 md:px-4 cursor-pointer" onClick={handleClickProfile}>
                 <span className="text-2xl md:text-3xl"><BiUser /></span>
                 <span className='hidden md:inline md:text-xl'>Profile</span>
+              </div>
+              <div className="flex items-center gap-4 hover:bg-gray-800 rounded-full px-2 py-2 md:px-4 cursor-pointer" onClick={handleClickLikedPosts}>
+                <span className="text-2xl md:text-3xl"><AiOutlineHeart /></span>
+                <span className='hidden md:inline md:text-xl'>Liked Posts</span>
               </div>
               <div className="flex items-center gap-4 hover:bg-gray-800 rounded-full px-2 py-2 md:px-4 cursor-pointer" onClick={handleClickBookmark}>
                 <span className="text-2xl md:text-3xl"><BiBookmark /></span>
