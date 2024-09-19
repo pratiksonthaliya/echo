@@ -15,6 +15,7 @@ import { useCurrentUser } from '@/hooks/user'
 import { toggleBookmarkMutation } from '@/graphql/mutation/bookmark'
 import GetBookmarks from '../GetBookmarks'
 
+
 interface FeedCardProps  {
   data: Post 
 }
