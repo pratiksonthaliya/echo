@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import React from 'react'
+import React, { useState } from 'react'
 import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai'
 import { BiBookmark, BiMessageRounded, BiSolidBookmark } from 'react-icons/bi'
 import { FaRetweet } from 'react-icons/fa'
@@ -14,7 +14,7 @@ import { usePostLikes } from '@/hooks/like'
 import { useCurrentUser } from '@/hooks/user'
 import { toggleBookmarkMutation } from '@/graphql/mutation/bookmark'
 import GetBookmarks from '../GetBookmarks'
-
+import Model from "@/components/LikeModel";
 
 interface FeedCardProps  {
   data: Post 
@@ -43,10 +43,13 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
 
   const { data: likeData } = usePostLikes(postId);
   const bookmarkData = GetBookmarks(userId as string); // useUserBookmarks(userId as string);
-  
+
   const likeCount = likeData?.getPostLikes?.length ?? 0;
   const isLiked = likeData?.getPostLikes?.some((like) => like?.user?.id === user?.id) && likeCount > 0;
   const isBookmarked = user ? bookmarkData?.getUserBookmarks?.some((bookmark) => bookmark?.post?.id === postId) : false;
+
+  const [showUserLiked, setShowUserLiked] = useState(false);  // To manage followers modal
+
 
   const likeMutation = useMutation({
     mutationFn: () => graphqlClient.request(toggleLikeMutation, { postId }),
@@ -113,14 +116,32 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
           <div className='flex flex-row justify-between mt-5 text-md items-center w-[90%] p-2'>
             <div><BiMessageRounded/></div>
             <div><FaRetweet/></div>
-            <div onClick={handleLike} className='cursor-pointer flex gap-1 items-center'>
-              <span>
+            <div className='cursor-pointer flex gap-1 items-center'>
+              <span onClick={handleLike} >
               {isLiked ? <AiFillHeart color='red' /> : <AiOutlineHeart />}
               </span>
-              <span>
+              <span onClick={() => setShowUserLiked(true)} >
               {likeCount} likes
               </span>
             </div>
+            <Model isOpen={showUserLiked} onClose={() => setShowUserLiked(false)} title="Liked by">
+              <ul>
+                {likeData?.getPostLikes?.map((like) => (
+                  <button key={like?.id} onClick={() => {
+                    setShowUserLiked(false)
+                  }}>
+                    <div className="flex items-center gap-2 bg-slate-800 rounded-full px-2 py-2 md:px-3 cursor-pointer mb-4 max-w-full">
+                      {like?.user?.profileImageUrl && (
+                        <Image className="rounded-full flex-shrink-0" src={like?.user?.profileImageUrl} alt="user-image" height={30} width={30} />
+                      )}
+                      <div className='hidden md:block overflow-hidden'>
+                        <h3 className="text-sm lg:text-md truncate">{like?.user?.firstName} {like?.user?.lastName}</h3>
+                      </div>
+                    </div>
+                  </button> 
+                ))}
+              </ul>
+            </Model>
             <div onClick={handleBookmark} className='cursor-pointer flex gap-1 items-center'>
               <span>
               {isBookmarked ? <BiSolidBookmark color='skyblue' /> : <BiBookmark />}

@@ -2,15 +2,6 @@ import { graphqlClient } from "@/clients/api"
 import { getCurrentUserQuery, getUserByIdQuery } from "@/graphql/query/user"
 import { useQuery } from "@tanstack/react-query"
 
-// export const useCurrentUser = (userId: string) => {
-//     const query = useQuery({
-//         queryKey: ["current-user", userId],
-//         queryFn: () => graphqlClient.request(getCurrentUserQuery)
-//     })
-
-//     return {...query, user: query.data?.getCurrentUser}
-// }
-
 export const useCurrentUser = () => {
     const query = useQuery({
         queryKey: ["current-user"],
@@ -20,7 +11,6 @@ export const useCurrentUser = () => {
 
     return {...query, user: query.data?.getCurrentUser};
 }
-
 
 export const useUserbyId = (userId: string) => {
     const query = useQuery({
@@ -32,20 +22,3 @@ export const useUserbyId = (userId: string) => {
 
     return {...query, user: query.data?.getUserById};
 }
-
-// export const useGetFollowers = () => {
-//     const queryClient = useQueryClient();
-
-//     const mutation = useMutation({
-//         // mutationKey: ["get-followers"],
-//         mutationFn: async (to: string) => await graphqlClient.request(FollowUserDocument, {to}),
-//         onMutate: () => toast.loading('Following', {id: '3'}),
-//         onSuccess: async () => {
-//             await queryClient.invalidateQueries({ queryKey: ['current-user'], refetchType: 'all' });
-//             await queryClient.invalidateQueries({ queryKey: ['get-followers'], refetchType: 'all' });
-//             toast.success('Followed', {id: '3'})
-//         } 
-//     })
-
-//     return mutation;
-// }

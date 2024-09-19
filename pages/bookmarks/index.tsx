@@ -7,7 +7,7 @@ import Link from "next/link";
 import { BsArrowLeftShort } from "react-icons/bs";
 
 const Bookmarks: React.FC = () => {
-    const { user } = useCurrentUser(); // Custom hook to get the current user
+    const { user } = useCurrentUser();
     const userId = user?.id;
 
     const { data: bookmarkData } = useUserBookmarks(userId as string);
