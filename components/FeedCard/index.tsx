@@ -15,6 +15,7 @@ import { useCurrentUser } from '@/hooks/user'
 import { toggleBookmarkMutation } from '@/graphql/mutation/bookmark'
 import GetBookmarks from '../GetBookmarks'
 import Model from "@/components/LikeModel";
+import { usePostComments } from '@/hooks/comment'
 
 interface FeedCardProps  {
   data: Post 
@@ -40,6 +41,8 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
   const postId = data?.id;
   const userId = user?.id;
   const queryClient = useQueryClient();
+
+  const {data: commentData} = usePostComments(postId);
 
   const { data: likeData } = usePostLikes(postId);
   const bookmarkData = GetBookmarks(userId as string); // useUserBookmarks(userId as string);
@@ -107,22 +110,37 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
               <Link href={`/${data?.author?.id}`}>{data?.author?.firstName} {data?.author?.lastName}</Link>
             </h3>
             {
-              formattedDate && <p className='text-slate-600 text-sm m-0.5'>{formattedDate}</p>
+              formattedDate && <p className='text-slate-600 text-sm m-0.5'>· {formattedDate}</p>
             }
           </div>
-          <p>
-          {data.content}
-          </p>
-          {data.imageURL && <Image src={data.imageURL} alt='Post-image' height={300} width={300}/>}
-          <div className='flex flex-row justify-between mt-5 text-md items-center w-[90%] p-2'>
-            <div><BiMessageRounded/></div>
+          <Link href={{
+            pathname: `/posts/${postId}`,
+            query: { postData: JSON.stringify(data) }, // Pass post data as a JSON string
+          }}>
+            {data?.content}
+          {data?.imageURL && <Image src={data?.imageURL} alt='Post-image' height={300} width={300}/>}
+          </Link>
+          <div className='flex flex-row justify-between mt-5 text-md items-center w-[90%] p-2 text-gray-500'>
+            <Link href={{
+              pathname: `/posts/${postId}`,
+              query: { postData: JSON.stringify(data) }, // Pass post data as a JSON string
+            }}>
+            <div className='cursor-pointer flex gap-1 items-center'>
+              <span>
+                <BiMessageRounded/>  
+              </span>
+              <span>
+                {commentData?.getCommentsByPost?.length}
+              </span>
+            </div>
+            </Link>
             <div><FaRetweet/></div>
             <div className='cursor-pointer flex gap-1 items-center'>
               <span onClick={handleLike} >
               {isLiked ? <AiFillHeart color='red' /> : <AiOutlineHeart />}
               </span>
               <span onClick={() => setShowUserLiked(true)} >
-              {likeCount} likes
+              {likeCount}
               </span>
             </div>
             <Model isOpen={showUserLiked} onClose={() => setShowUserLiked(false)} title="Liked by">

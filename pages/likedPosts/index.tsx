@@ -10,23 +10,6 @@ const Bookmarks: React.FC = () => {
     const userId = user?.id;
 
     const { data: likedPosts } = useGetLikedPostByUser(userId as string);
-    if(!likedPosts?.getLikedPostsByUser || likedPosts?.getLikedPostsByUser.length === 0){
-      return <>
-        <EchoLayout>
-            <div>
-            <nav className="flex items-center gap-3 py-3 px-3">
-                <Link href='/'>
-                <BsArrowLeftShort className="text-4xl md:text-5xl hover:bg-gray-800 rounded-full p-1 h-fit w-fit cursor-pointer transition-all mb-4"/>
-                </Link>
-                <div>
-                    <h1 className="text-xl font-bold">Like posts to see here.</h1>
-                    <h1 className="text-md font-bold text-slate-500">{likedPosts?.getLikedPostsByUser.length} Posts</h1>
-                </div>
-            </nav>
-            </div>
-        </EchoLayout>
-      </>
-    }
   
     return (
         <div>
@@ -43,9 +26,11 @@ const Bookmarks: React.FC = () => {
                 </nav>
                 </div>
                 <div>
-                {likedPosts?.getLikedPostsByUser.map((post) => (
-                    <FeedCard key={post.id} data={post as Post} />  // Reuse FeedCard component
-                ))}
+                {likedPosts?.getLikedPostsByUser?.length !== 0 ? 
+                    likedPosts?.getLikedPostsByUser.map((post) => (
+                        <FeedCard key={post.id} data={post as Post} />  // Reuse FeedCard component
+                    )) : <p className="text-gray-500 text-center">Like posts to see here</p>
+                }
                 </div>                    
             </EchoLayout>
         </div>
