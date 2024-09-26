@@ -9,30 +9,11 @@ import { usePostComments } from '@/hooks/comment'
 import { useCurrentUser } from '@/hooks/user'
 import { BsArrowLeftShort } from 'react-icons/bs'
 import Link from 'next/link'
-import { Maybe } from 'graphql/jsutils/Maybe'
-import { format } from 'date-fns';
 import toast from 'react-hot-toast'
 import { graphqlClient } from '@/clients/api'
 import { addCommentMutation } from '@/graphql/mutation/comment'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-
-
-// interface ServerProps {
-//     postInfo?: Post
-//   }
-
-const handleDate = (createdAt: Maybe<string> | undefined) => {
-  let dateObject: Date | null = null;
-  if (createdAt) {
-      const timestamp = Number(createdAt);
-      if (!isNaN(timestamp) && timestamp.toString().length === 13) { // 13 digits for milliseconds
-          dateObject = new Date(timestamp);
-      } else {
-          dateObject = new Date(createdAt);
-      }
-  }
-  return dateObject ? format(dateObject, 'MMM d, h:mm a') : 'Invalid Date or Time';
-}
+import CommentCard from '@/components/CommentCard'
 
 const PostPage: NextPage = () => {
   const router = useRouter();
@@ -120,26 +101,7 @@ const PostPage: NextPage = () => {
               <div>
                 <h2 className="text-xl font-bold mb-4">Comments</h2>
                 {commentData?.getCommentsByPost?.map((comment) => (
-                  <div key={comment.id} className="comment flex space-x-3 p-4 border-b border-gray-800">
-                    <div className="flex-shrink-0">
-                      {comment.user?.profileImageUrl && (
-                        <Image 
-                          src={comment.user.profileImageUrl} 
-                          alt={`${comment.user.firstName} ${comment.user.lastName}`}
-                          width={40} 
-                          height={40} 
-                          className="rounded-full" 
-                        />
-                      )}
-                    </div>
-                    <div className="flex-grow">
-                      <div className="flex items-center">
-                        <span className="font-bold mr-2">{comment.user?.firstName} {comment.user?.lastName}</span>
-                        <span className="text-gray-500 text-sm">· {handleDate(comment?.createdAt)}</span>
-                      </div>
-                      <p className="text-gray-300 mt-1">{comment.content}</p>
-                    </div>
-                  </div>
+                  <CommentCard key={comment?.id} data={comment} />
                 ))}
               </div>
             ) : (

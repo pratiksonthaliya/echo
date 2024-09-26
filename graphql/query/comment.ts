@@ -4,15 +4,17 @@ export const getCommentsByPostQuery = graphql(`#graphql
         
     query GetCommentsByPost($postId: ID!) {
         getCommentsByPost(postId: $postId) {
+            id
             content
             createdAt
-            id
             user {
+                id
                 firstName
                 lastName
-                id
+                email
                 profileImageUrl
             }
+
         }
     }
 `); 
