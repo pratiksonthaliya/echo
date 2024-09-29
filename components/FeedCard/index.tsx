@@ -2,7 +2,6 @@ import Image from 'next/image'
 import React, { useState } from 'react'
 import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai'
 import { BiBookmark, BiMessageRounded, BiSolidBookmark } from 'react-icons/bi'
-import { FaRetweet } from 'react-icons/fa'
 import { Maybe, Post } from '@/gql/graphql'
 import Link from 'next/link'
 import { format } from 'date-fns';
@@ -134,7 +133,7 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
               </span>
             </div>
             </Link>
-            <div><FaRetweet/></div>
+            {/* <div><FaRetweet/></div> */}
             <div className='cursor-pointer flex gap-1 items-center'>
               <span onClick={handleLike} >
               {isLiked ? <AiFillHeart color='red' /> : <AiOutlineHeart />}

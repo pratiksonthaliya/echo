@@ -10,6 +10,7 @@ import { graphqlClient } from '@/clients/api';
 import toast from 'react-hot-toast';
 import { useCommentLikes } from '@/hooks/commentLike';
 import Model from "@/components/LikeModel";
+import Link from 'next/link';
 
 
 interface CardProps {
@@ -78,7 +79,9 @@ const CommentCard: React.FC<CardProps> = ({ data }) => {
       </div>
       <div className="flex-grow">
         <div className="flex items-center">
+          <Link href={`/${comment?.user?.id}`}>
           <span className="font-bold mr-2">{comment.user?.firstName} {comment.user?.lastName}</span>
+          </Link>
           <span className="text-slate-600 text-sm">· {handleDate(comment?.createdAt)}</span>
         </div>
         <div className="flex items-center justify-between w-fulL text-gray-500 text-sm mr-4">

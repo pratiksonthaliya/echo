@@ -49,7 +49,7 @@ const PostPage: NextPage = () => {
   return (
     <div className="bg-black text-white min-h-screen">
       <EchoLayout>
-        <div className="max-w-2xl mx-auto">
+        <div className=" mx-auto">
           <nav className="flex items-center gap-3 py-3 px-3 border-b border-gray-800">
             <Link href='/'>
               <BsArrowLeftShort className="text-4xl md:text-5xl hover:bg-gray-800 rounded-full p-1 h-fit w-fit cursor-pointer transition-all"/>

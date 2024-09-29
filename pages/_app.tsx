@@ -5,6 +5,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
+import Head from "next/head";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -21,14 +22,20 @@ const queryClient = new QueryClient();
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-  <div className={`${geistSans.variable} ${geistMono.variable} font-[family-name:var(--font-geist-sans)]`}>
-    <QueryClientProvider client={queryClient}>
-      <GoogleOAuthProvider clientId="884345547859-4ehmqdt1je88b3krt62i1s2ncmicar9m.apps.googleusercontent.com">
-          <Component {...pageProps} />
-          <Toaster />
-          <ReactQueryDevtools />
-      </GoogleOAuthProvider>
-    </QueryClientProvider>
-  </div>
+    <>
+    <Head>
+      <title>Echo </title>
+      <meta name="description" content="This is the homepage of My Social Media App: Echo" />
+    </Head>   
+    <div className={`${geistSans.variable} ${geistMono.variable} font-[family-name:var(--font-geist-sans)]`}>
+      <QueryClientProvider client={queryClient}>
+        <GoogleOAuthProvider clientId="884345547859-4ehmqdt1je88b3krt62i1s2ncmicar9m.apps.googleusercontent.com">
+            <Component {...pageProps} />
+            <Toaster />
+            <ReactQueryDevtools />
+        </GoogleOAuthProvider>
+      </QueryClientProvider>
+    </div>
+    </>
   )
 }

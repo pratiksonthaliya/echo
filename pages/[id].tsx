@@ -167,7 +167,11 @@ const UserProfilePage: NextPage<ServerProps> = (props) => {
             </div>
           </div>
           <div>
-            {props?.userInfo?.posts?.map((post) => <FeedCard data={post as Post} key={post?.id} />)}
+            {props?.userInfo?.posts?.length ?
+                  props?.userInfo?.posts?.map((post) => (
+                    <FeedCard data={post as Post} key={post?.id} /> // Reuse FeedCard component
+                )) : <p className="text-gray-500 text-center">Post something to see here</p>
+            }
           </div>
         </div>
       </EchoLayout>
