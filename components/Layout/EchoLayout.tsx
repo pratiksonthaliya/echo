@@ -72,7 +72,9 @@ const EchoLayout: React.FC<EchoLayoutProps> = (props) => {
       toast.success(`Verified Successful`) 
       // console.log(verifyGoogleToken);
       
-      if(verifyGoogleToken) window.localStorage.setItem('__echo_token', verifyGoogleToken);
+      if(verifyGoogleToken){
+        window.localStorage.setItem('__echo_token', verifyGoogleToken);
+      } 
 
       await queryClient.invalidateQueries({ queryKey: ['current-user'], refetchType: 'all' });
 

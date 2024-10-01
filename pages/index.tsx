@@ -97,7 +97,7 @@ export default function Home(props: HomeProps) {
               <Image alt="user-image" src={user?.profileImageUrl} height={50} width={50} className='rounded-full' />}
             </div>
             <div className="col-span-11 ">
-              <textarea value={content} onChange={e => setContent(e.target.value)} className="w-full bg-transparent text-xl px-3 border-b border-slate-700" rows={3} placeholder="What's happening?" name="" id=""></textarea>
+              <textarea id="Post-data" value={content} onChange={e => setContent(e.target.value)} className="w-full bg-transparent text-xl px-3 border-b border-slate-700" rows={3} placeholder="What's happening?" name=""></textarea>
               {imageURL && <Image src={imageURL} alt="post-image" width={200} height={200}/>}
               <div className="mt-2 flex justify-between items-center">
                 <BiImageAlt onClick={handleSelectImage} className="text-2xl"/>

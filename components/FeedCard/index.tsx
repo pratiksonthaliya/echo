@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai'
 import { BiBookmark, BiMessageRounded, BiSolidBookmark } from 'react-icons/bi'
 import { Maybe, Post } from '@/gql/graphql'
@@ -52,6 +52,15 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
 
   const [showUserLiked, setShowUserLiked] = useState(false);  // To manage followers modal
 
+  const [formattedDate, setFormattedDate] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (data?.createdAt) {
+      const date = handleDate(data?.createdAt);
+      setFormattedDate(date);
+    }
+  }, [data?.createdAt]);
+
 
   const likeMutation = useMutation({
     mutationFn: () => graphqlClient.request(toggleLikeMutation, { postId }),
@@ -92,8 +101,6 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
     }
     bookmarkMutation.mutate();
   };
-
-  const formattedDate = handleDate(data?.createdAt);
  
   return (
     <div className='p-5 border-t-[0.5px] border-gray-700 hover:bg-gray-900 transition-all cursor-pointer '>

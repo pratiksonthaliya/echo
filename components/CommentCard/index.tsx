@@ -1,7 +1,7 @@
 import { Maybe, Comment } from '@/gql/graphql';
 import Image from 'next/image';
 import { format } from 'date-fns';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCurrentUser } from '@/hooks/user';
@@ -17,17 +17,19 @@ interface CardProps {
   data: Comment | Partial<Comment>;
 }
 
-const handleDate = (createdAt: Maybe<string> | undefined) => {
+const handleDate = (createdAt: Maybe<string> | undefined): string => {
   let dateObject: Date | null = null;
+
   if (createdAt) {
     const timestamp = Number(createdAt);
     if (!isNaN(timestamp) && timestamp.toString().length === 13) {
-      // 13 digits for milliseconds
+      // 13 digits for milliseconds (UNIX timestamp in ms)
       dateObject = new Date(timestamp);
     } else {
-      dateObject = new Date(createdAt);
+      dateObject = new Date(createdAt); // Try to parse ISO date string or other valid formats
     }
   }
+
   return dateObject ? format(dateObject, 'MMM d, h:mm a') : 'Invalid Date or Time';
 };
 
@@ -41,6 +43,15 @@ const CommentCard: React.FC<CardProps> = ({ data }) => {
   const likeCount = likeData?.getCommentLikes?.length ?? 0;
   const isLiked = likeData?.getCommentLikes?.some((like) => like?.user?.id === user?.id) && likeCount > 0;
   const [showUserLiked, setShowUserLiked] = useState(false);  // To manage followers modal
+
+  const [formattedDate, setFormattedDate] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (comment?.createdAt) {
+      const date = handleDate(comment.createdAt);
+      setFormattedDate(date);
+    }
+  }, [comment?.createdAt]);
 
 
   const likeMutation = useMutation({
@@ -82,7 +93,7 @@ const CommentCard: React.FC<CardProps> = ({ data }) => {
           <Link href={`/${comment?.user?.id}`}>
           <span className="font-bold mr-2">{comment.user?.firstName} {comment.user?.lastName}</span>
           </Link>
-          <span className="text-slate-600 text-sm">· {handleDate(comment?.createdAt)}</span>
+          <span className="text-slate-600 text-sm">· {formattedDate}</span>
         </div>
         <div className="flex items-center justify-between w-fulL text-gray-500 text-sm mr-4">
           <p className="flex-grow text-gray-300">{comment.content}</p>

@@ -180,10 +180,9 @@ const UserProfilePage: NextPage<ServerProps> = (props) => {
 }
 
 export const getServerSideProps: GetServerSideProps<ServerProps> = async (context) => {
-  const id = context.query.id as string | undefined;
-  if(!id) return { notFound: true, props: {userInfo: undefined }}
-
   try {
+    const id = context.query.id as string | undefined;
+    if(!id) return { notFound: true, props: {userInfo: undefined }}
     const userInfo = await graphqlClient.request(getUserByIdQuery, { id });
     if(!userInfo?.getUserById) return {notFound: true, props: {userInfo: undefined }}
 
