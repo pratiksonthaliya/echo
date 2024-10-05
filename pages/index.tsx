@@ -11,6 +11,7 @@ import { useCreatePost, useGetAllPosts } from "@/hooks/post";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { Post } from "@/gql/graphql";
+import Post_CommentLoader from "@/components/Loaders/Post_CommentLoader";
 
 interface HomeProps {
   posts?: Post[]
@@ -24,6 +25,7 @@ export default function Home(props: HomeProps) {
 
   const [content, setContent] = useState("");
   const [imageURL, setImageURL] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleCreatePost = useCallback(async () => {
     if(!user || !user?.id){
@@ -36,12 +38,20 @@ export default function Home(props: HomeProps) {
       return;
     }
 
-    await mutateAsync({
-      content,
-      imageURL
-    }) 
-    setContent('');
-    setImageURL('');
+    setIsLoading(true); // Set loading to true before mutation
+    try {
+      await mutateAsync({
+        content,
+        imageURL
+      });
+      setContent('');
+      setImageURL('');
+      toast.success('Post created successfully!'); // Optional success message
+    } catch (error) {
+      toast.error(`Error creating post: Try Again`); // Handle errors if any
+    } finally {
+      setIsLoading(false); // Reset loading to false after mutation
+    }
   }, [content, imageURL, mutateAsync, user]);
 
   const handleInputChnageFile = useCallback((input: HTMLInputElement) => {
@@ -101,7 +111,10 @@ export default function Home(props: HomeProps) {
               {imageURL && <Image src={imageURL} alt="post-image" width={200} height={200}/>}
               <div className="mt-2 flex justify-between items-center">
                 <BiImageAlt onClick={handleSelectImage} className="text-2xl"/>
-                <button onClick={handleCreatePost} className="py-2 px-4 bg-[#1d9bf0] font-semibold text-sm rounded-full mx-50">Post</button>
+                <button onClick={handleCreatePost} className="py-2 px-4 bg-[#1d9bf0] font-semibold text-sm rounded-full mx-50">
+                  {isLoading ? 'Posting...' : 'Post'}
+                </button>
+                {isLoading && <Post_CommentLoader />}
               </div>
             </div>
           </div>

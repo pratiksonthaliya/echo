@@ -11,6 +11,7 @@ import toast from 'react-hot-toast';
 import { useCommentLikes } from '@/hooks/commentLike';
 import Model from "@/components/LikeModel";
 import Link from 'next/link';
+import LikeLoader from '../Loaders/LikeLoader';
 
 
 interface CardProps {
@@ -41,7 +42,7 @@ const CommentCard: React.FC<CardProps> = ({ data }) => {
   const { data: likeData } = useCommentLikes(commentId);
 
   const likeCount = likeData?.getCommentLikes?.length ?? 0;
-  const isLiked = likeData?.getCommentLikes?.some((like) => like?.user?.id === user?.id) && likeCount > 0;
+  const isLiked = (likeData?.getCommentLikes?.some((like) => like?.user?.id === user?.id) && likeCount > 0) ?? false;
   const [showUserLiked, setShowUserLiked] = useState(false);  // To manage followers modal
 
   const [formattedDate, setFormattedDate] = useState<string | null>(null);
@@ -53,13 +54,16 @@ const CommentCard: React.FC<CardProps> = ({ data }) => {
     }
   }, [comment?.createdAt]);
 
+  const [isLiking, setIsLiking] = useState(false);
 
   const likeMutation = useMutation({
     mutationFn: () => graphqlClient.request(toggleCommentLikeMutation, { commentId }),
-    // onMutate: () =>  toast.custom('❤️', { id: '2'}, ),
+    onMutate: () => {
+      setIsLiking(true);
+    },    
     onSuccess: (data) => {
+      setIsLiking(false);
       queryClient.invalidateQueries({queryKey: ["comment-likes", commentId], refetchType: 'all'});
-      // queryClient.invalidateQueries({queryKey: ["liked-posts", userId], refetchType: 'all'});
       toast.success(data.toggleCommentLike.isLiked ? 'Liked!❤️' : 'Unliked!', { id: '2' });
     },
     onError: (error: Error) => {
@@ -99,7 +103,9 @@ const CommentCard: React.FC<CardProps> = ({ data }) => {
           <p className="flex-grow text-gray-300">{comment.content}</p>
           <div className="flex gap-2 items-center text-sm">
             <span onClick={handleCommentLike} className="cursor-pointer">
-              {isLiked ? <AiFillHeart color="red" /> : <AiOutlineHeart />}
+              {/* {isLiked ? <AiFillHeart color="red" /> : <AiOutlineHeart />} */}
+              {isLiking ? <LikeLoader isLiked={isLiked}/> : (isLiked ? <AiFillHeart color='red' /> : <AiOutlineHeart />)}
+
             </span>
             <span onClick={() => setShowUserLiked(true)} className="cursor-pointer">
               {likeCount}

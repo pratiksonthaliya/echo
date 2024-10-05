@@ -9,12 +9,13 @@ import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { graphqlClient } from '@/clients/api';
 import { verifyUserGoogleTokenQuery } from '@/graphql/query/user';
-import Link from 'next/link';
+// import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { AiOutlineHeart } from 'react-icons/ai';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HiMenu, HiX } from 'react-icons/hi';
 import { FaSlackHash } from 'react-icons/fa';
+import Loader from '../Loaders/Loader';
 
 interface EchoLayoutProps {
     children: React.ReactNode
@@ -25,6 +26,7 @@ const EchoLayout: React.FC<EchoLayoutProps> = (props) => {
   const [isClient, setIsClient] = useState(false); // Check if running on client
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setIsClient(true); // This runs only on the client-side
@@ -34,12 +36,20 @@ const EchoLayout: React.FC<EchoLayoutProps> = (props) => {
   const { user } = useCurrentUser();  
   const queryClient = useQueryClient();
 
+  const handleClickHome = () => {
+    setIsLoading(true);
+    router.push(`/`);
+    setIsLoading(false);
+  };
+
   const handleClickProfile = (e: { preventDefault: () => void; }) => {
     if (!user?.id) {
       e.preventDefault(); // Prevent the link from navigating
       toast.error("Please Login to access this page!");
     } else {
+      setIsLoading(true);
       router.push(`/${user.id}`);
+      setIsLoading(false);
     }
   };
 
@@ -48,7 +58,9 @@ const EchoLayout: React.FC<EchoLayoutProps> = (props) => {
       e.preventDefault(); // Prevent the link from navigating
       toast.error("Please Login to access this page!");
     } else {
+      setIsLoading(true);
       router.push(`/bookmarks`);
+      setIsLoading(false);
     }
   };
 
@@ -57,7 +69,9 @@ const EchoLayout: React.FC<EchoLayoutProps> = (props) => {
       e.preventDefault(); // Prevent the link from navigating
       toast.error("Please Login to access this page!");
     } else {
+      setIsLoading(true);
       router.push(`/likedPosts`);
+      setIsLoading(false);
     }
   };
 
@@ -200,6 +214,8 @@ const EchoLayout: React.FC<EchoLayoutProps> = (props) => {
           </motion.button>
         </div>
 
+        { isLoading && <Loader /> }
+
         {/* SideBar PC */}
         <AnimatePresence>
           {(isClient && (isMobileMenuOpen || window.innerWidth >= 768)) && (
@@ -237,10 +253,14 @@ const EchoLayout: React.FC<EchoLayoutProps> = (props) => {
                     </span>
                   </motion.button>
                   <nav className="mt-6 space-y-4">
-                    <Link href="/" className="flex items-center gap-4 hover:bg-gray-800 rounded-full px-4 py-3 transition-colors duration-200">
+                    <motion.div
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleClickHome}
+                      className="flex items-center gap-4 hover:bg-gray-800 rounded-full px-4 py-3 cursor-pointer transition-colors duration-200"
+                    >
                       <BiSolidHome className="text-2xl" />
                       <span className="hidden md:inline text-xl truncate">Home</span>
-                    </Link>
+                    </motion.div>
                     <motion.div
                       whileTap={{ scale: 0.95 }}
                       onClick={handleClickProfile}

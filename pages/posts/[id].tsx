@@ -14,6 +14,7 @@ import { graphqlClient } from '@/clients/api'
 import { addCommentMutation } from '@/graphql/mutation/comment'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import CommentCard from '@/components/CommentCard'
+import Post_CommentLoader from '@/components/Loaders/Post_CommentLoader'
 
 const PostPage: NextPage = () => {
   const router = useRouter();
@@ -24,11 +25,16 @@ const PostPage: NextPage = () => {
   const { data: commentData } = usePostComments(postData?.id as string);
 
   const [newComment, setNewComment] = useState("");
+  const [isReplying, setIsReplying] = useState(false);
+
 
   const commentMutation = useMutation({
     mutationFn: () => graphqlClient.request(addCommentMutation, { postId: postData?.id, content: newComment }),
-    // onMutate: () =>  toast.custom('❤️', { id: '2'}, ),
+    onMutate: () => {
+      setIsReplying(true);
+    },
     onSuccess: () => {
+      setIsReplying(false);
       setNewComment('');
       queryClient.invalidateQueries({queryKey: ["post-comments", postData?.id], refetchType: 'all'});
       toast.success('comment added', { id: '2' });
@@ -89,8 +95,9 @@ const PostPage: NextPage = () => {
                     onClick={handleCreateComment} 
                     className="py-2 px-4 bg-blue-500 text-white font-semibold text-sm rounded-full hover:bg-blue-600 transition duration-200"
                   >
-                    Reply
+                    {isReplying ? 'Replying...' : 'Reply'}
                   </button>
+                  {isReplying && <Post_CommentLoader />}
                 </div>
               </div>
             </div>

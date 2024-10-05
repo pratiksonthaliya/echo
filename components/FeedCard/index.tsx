@@ -15,6 +15,8 @@ import { toggleBookmarkMutation } from '@/graphql/mutation/bookmark'
 import GetBookmarks from '../GetBookmarks'
 import Model from "@/components/LikeModel";
 import { usePostComments } from '@/hooks/comment'
+import LikeLoader from '../Loaders/LikeLoader'
+import BookmarkLoader from '../Loaders/BookmarkLoader'
 
 interface FeedCardProps  {
   data: Post 
@@ -47,12 +49,15 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
   const bookmarkData = GetBookmarks(userId as string); // useUserBookmarks(userId as string);
 
   const likeCount = likeData?.getPostLikes?.length ?? 0;
-  const isLiked = likeData?.getPostLikes?.some((like) => like?.user?.id === user?.id) && likeCount > 0;
-  const isBookmarked = user ? bookmarkData?.getUserBookmarks?.some((bookmark) => bookmark?.post?.id === postId) : false;
+  const isLiked = (likeData?.getPostLikes?.some((like) => like?.user?.id === user?.id) && likeCount > 0) ?? false;
+  const isBookmarked = user ? (bookmarkData?.getUserBookmarks?.some((bookmark) => bookmark?.post?.id === postId)) ?? false : false;
 
   const [showUserLiked, setShowUserLiked] = useState(false);  // To manage followers modal
 
   const [formattedDate, setFormattedDate] = useState<string | null>(null);
+
+  const [isLiking, setIsLiking] = useState(false);
+  const [isBookmarking, setIsBookmarking] = useState(false);
 
   useEffect(() => {
     if (data?.createdAt) {
@@ -64,24 +69,33 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
 
   const likeMutation = useMutation({
     mutationFn: () => graphqlClient.request(toggleLikeMutation, { postId }),
-    // onMutate: () =>  toast.custom('❤️', { id: '2'}, ),
+    onMutate: () => {
+      setIsLiking(true);  
+    },
     onSuccess: (data) => {
+      setIsLiking(false); 
       queryClient.invalidateQueries({queryKey: ["post-likes", postId], refetchType: 'all'});
       queryClient.invalidateQueries({queryKey: ["liked-posts", userId], refetchType: 'all'});
       toast.success(data.toggleLike.isLiked ? 'Liked!❤️' : 'Unliked!', { id: '2' });
     },
     onError: (error: Error) => {
+      setIsLiking(false); 
       toast.error(`Error: ${error.message}`, { id: '2' });
     },
   });
 
   const bookmarkMutation = useMutation({
     mutationFn: () => graphqlClient.request(toggleBookmarkMutation, { postId }),
+    onMutate: () => {
+      setIsBookmarking(true); 
+    },
     onSuccess: (data) => {
+      setIsBookmarking(false);
       queryClient.invalidateQueries({queryKey: ["add-bookmark", userId], refetchType: 'all'});
       toast.success(data.toggleBookmark.isBookmarked ? 'Bookmarked!' : 'Removed From Bookmark!', { id: '3' });
     },
     onError: (error: Error) => {
+      setIsBookmarking(false);
       toast.error(`Error: ${error.message}`, { id: '3' });
     },
   });
@@ -143,7 +157,8 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
             {/* <div><FaRetweet/></div> */}
             <div className='cursor-pointer flex gap-1 items-center'>
               <span onClick={handleLike} >
-              {isLiked ? <AiFillHeart color='red' /> : <AiOutlineHeart />}
+              {/* {isLiked ? <AiFillHeart color='red' /> : <AiOutlineHeart />} */}
+              {isLiking ? <LikeLoader isLiked={isLiked}/> : (isLiked ? <AiFillHeart color='red' /> : <AiOutlineHeart />)}
               </span>
               <span onClick={() => setShowUserLiked(true)} >
               {likeCount}
@@ -169,7 +184,8 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
             </Model>
             <div onClick={handleBookmark} className='cursor-pointer flex gap-1 items-center'>
               <span>
-              {isBookmarked ? <BiSolidBookmark color='skyblue' /> : <BiBookmark />}
+              {/* {isBookmarked ? <BiSolidBookmark color='skyblue' /> : <BiBookmark />} */}
+              {isBookmarking ? <BookmarkLoader isBookmarked = {isBookmarked}/> : (isBookmarked ? <BiSolidBookmark color='skyblue' /> : <BiBookmark />)}
               </span>
             </div>
           </div>

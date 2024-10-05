@@ -15,6 +15,7 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/router";
 import Model from "@/components/FollowModel";
 import debounce from 'lodash.debounce';
+import FollowLoader from "@/components/Loaders/FollowLoader";
 
 
 interface ServerProps {
@@ -164,6 +165,7 @@ const UserProfilePage: NextPage<ServerProps> = (props) => {
                   </button>
                 )
               }
+              {loading && <FollowLoader amIFollowing={amIFollowing} />}
             </div>
           </div>
           <div>
